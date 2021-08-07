@@ -11,11 +11,20 @@ module ISBNdb
     end
 
     def request(page, params = {})
-      response = self.class.get(URI.escape(page), query: params, headers: headers, timeout: 60)
-      raise ISBNdb::RequestError.new "HTTP Response: #{response.code}" if response.code != 200
-      begin
-        self.class.snakify(response.parsed_response)
-      rescue JSON::ParserError
+      response = self.class.get(
+        URI.escape(page),
+        query: params,
+        headers: headers,
+        timeout: 60
+      )
+
+      if response.code == 200
+        begin
+          self.class.snakify(response.parsed_response)
+        rescue JSON::ParserError
+          nil
+        end
+      else
         nil
       end
     end
